@@ -1,0 +1,142 @@
+"""
+Simulación evento a evento de la flota de taxis para una franja horaria.
+"""
+
+import random
+
+from Simulacion import generadores
+from Simulacion.calificaciones import SistemaCalificaciones
+from Simulacion.flota import Flota
+
+
+HV=9999
+
+class Simulacion:
+    """
+    Parámetros
+    ----------
+    cantidad_convencionales, cantidad_electricos, cantidad_autonomos : int
+        Cantidad de taxis de cada tipo.
+    lambda_arribo : float
+        Parámetro lambda de la Exponencial que genera el intervalo entre
+        arribos (IA) para la franja horaria simulada.
+    HV : float
+        Horizonte de la simulación, en segundos. La simulación corre
+        mientras T < HV.
+    tarifa_base : float
+        Tarifa base (B) del sistema de pago, según la franja horaria.
+    seed : int | None
+        Semilla del generador aleatorio, para reproducibilidad.
+    """
+
+    def __init__(
+        self,
+        cantidad_convencionales,
+        cantidad_electricos,
+        cantidad_autonomos,
+        lambda_arribo,
+        tarifa_base=0.0,
+        seed=None,
+    ):
+        self.lambda_arribo = lambda_arribo
+        self.tarifa_base = tarifa_base
+        self.rng = random.Random(seed)
+
+        self.flota = Flota(cantidad_convencionales, cantidad_electricos, cantidad_autonomos)
+        self.calificaciones = SistemaCalificaciones(self.rng)
+
+        # --- Variables de tiempo de la simulación ---
+        self.T = 0.0
+        self.TPLL = 0.0
+
+        # --- Acumuladores internos para calcular métricas al finalizar ---
+        self._suma_esperas = 0.0
+        self._cantidad_viajes_completados = 0
+        self._cantidad_solicitudes = 0
+        self._cantidad_arrepentidos = 0
+        self._ingresos = 0.0
+        self._costos = 0.0  # TODO: sumar costo de recarga/reabastecimiento por vehículo
+
+        # --- Métricas finales (se completan al terminar correr()) ---
+        self.TPE = 0.0
+        self.TPOC = 0.0
+        self.TPOE = 0.0
+        self.TPOA = 0.0
+        self.PARR = 0.0
+        self.BN = 0.0
+
+    # ------------------------------------------------------------------
+    # Procesamiento de una solicitud de viaje
+    # ------------------------------------------------------------------
+    def procesar_solicitud(self):
+        self._cantidad_solicitudes += 1
+
+        tipo, promedio = self.calificaciones.mejor_tipo()
+        if not self.calificaciones.pasajero_acepta(tipo, promedio):
+            # El pasajero abandona: por su misma naturaleza, no prueba otro servicio.
+            self._cantidad_arrepentidos += 1
+            return
+
+        esta_disponible_ahora,indice_taxi, tiempo_espera = self.flota.taxi_disponible(tipo, self.T)
+
+        self._suma_esperas += tiempo_espera
+
+        dis = generadores.generar_distancia(self.rng)
+        tv = generadores.tiempo_viaje(dis)
+
+        if esta_disponible_ahora:
+            # Si esta disponible ahora, significa que hasta entonces el taxi estaba ocioso
+            self.flota.tiempo_ocioso[tipo][indice_taxi]+= self.T - self.flota.tiempo_comprometido[tipo][indice_taxi]
+
+            inicio_viaje=self.T # El viaje empieza en ese momento, porque el taxi estaba libre
+            self.flota.tiempo_comprometido[tipo][indice_taxi]=inicio_viaje+tv
+        else:
+            # Si no esta disponible ahora, significa que el taxi estaba ocupado y el viaje empieza cuando se libera
+            inicio_viaje=self.flota.tiempo_comprometido[tipo][indice_taxi]
+            # El viaje tiene su tiempo comprometido hasta que termine ese viaje
+            self.flota.tiempo_comprometido[tipo][indice_taxi]=inicio_viaje+tv
+
+        self._cantidad_viajes_completados += 1
+
+        pago = self.tarifa_base + 2.75 * dis
+        self._ingresos += pago
+        # TODO: sumar costo de combustible/energía consumido en el viaje
+        # y el costo de recarga/reabastecimiento cuando corresponda.
+
+        self.calificaciones.registrar_viaje(tipo, tiempo_espera)
+
+    # ------------------------------------------------------------------
+    # Loop principal de la simulación
+    # ------------------------------------------------------------------
+    def correr(self):
+        while self.T<HV:
+            intervalo = generadores.generar_intervalo_arribo(self.rng, self.lambda_arribo)
+            self.T += intervalo
+            self.TPLL = self.T
+            self.procesar_solicitud()
+
+        self._calcular_metricas_finales()
+        return self
+
+    def _calcular_metricas_finales(self):
+        if self._cantidad_viajes_completados:
+            self.TPE = self._suma_esperas / self._cantidad_viajes_completados
+
+        self.TPOC = self.flota.tiempo_ocioso_promedio("convencional", self.T)
+        self.TPOE = self.flota.tiempo_ocioso_promedio("electrico", self.T)
+        self.TPOA = self.flota.tiempo_ocioso_promedio("autonomo", self.T)
+
+        if self._cantidad_solicitudes:
+            self.PARR = 100 * self._cantidad_arrepentidos / self._cantidad_solicitudes
+
+        self.BN = self._ingresos - self._costos  # costos aún pendientes (ver TODOs)
+
+    def __repr__(self):
+        return (
+            f"Simulacion(T={self.T:.1f}, TPE={self.TPE:.1f}, "
+            f"TPOC={self.TPOC:.1f}, TPOE={self.TPOE:.1f}, TPOA={self.TPOA:.1f}, "
+            f"PARR={self.PARR:.2f}%, BN={self.BN:.2f}, "
+            f"calif_conv={self.calificaciones.promedio('convencional'):.2f}, "
+            f"calif_elec={self.calificaciones.promedio('electrico'):.2f}, "
+            f"calif_auto={self.calificaciones.promedio('autonomo'):.2f})"
+        )

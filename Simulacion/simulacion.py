@@ -7,6 +7,7 @@ import random
 from Simulacion import generadores
 from Simulacion.calificaciones import SistemaCalificaciones
 from Simulacion.flota import Flota
+from Simulacion.energia import Energia
 
 
 HV=9999
@@ -44,6 +45,7 @@ class Simulacion:
 
         self.flota = Flota(cantidad_convencionales, cantidad_electricos, cantidad_autonomos)
         self.calificaciones = SistemaCalificaciones(self.rng)
+        self.energia = Energia(cantidad_convencionales, cantidad_electricos, cantidad_autonomos)
 
         # --- Variables de tiempo de la simulación ---
         self.T = 0.0
@@ -55,8 +57,7 @@ class Simulacion:
         self._cantidad_solicitudes = 0
         self._cantidad_arrepentidos = 0
         self._ingresos = 0.0
-        self._costos = 0.0  # TODO: sumar costo de recarga/reabastecimiento por vehículo
-
+        self._costos = 0.0
         # --- Métricas finales (se completan al terminar correr()) ---
         self.TPE = 0.0
         self.TPOC = 0.0
@@ -96,13 +97,19 @@ class Simulacion:
             # El viaje tiene su tiempo comprometido hasta que termine ese viaje
             self.flota.tiempo_comprometido[tipo][indice_taxi]=inicio_viaje+tv
 
+        # --- Consumo de energía y recarga ---
+        # Apenas se sabe la distancia y el tiempo del viaje, se descuenta el
+        # consumo del vehículo y, si cae por debajo del umbral, se recarga.
+        self.energia.consumir(tipo, indice_taxi, dis)
+        if self.energia.necesita_recarga(tipo, indice_taxi):
+            tiempo_recarga, costo_recarga = self.energia.recargar(tipo, indice_taxi)
+            # El tiempo de recarga se suma al tiempo comprometido del vehículo,
+            # tal como indica el enunciado.
+            self.flota.tiempo_comprometido[tipo][indice_taxi] += tiempo_recarga
+            self._costos += costo_recarga
         self._cantidad_viajes_completados += 1
-
         pago = self.tarifa_base + 2.75 * dis
         self._ingresos += pago
-        # TODO: sumar costo de combustible/energía consumido en el viaje
-        # y el costo de recarga/reabastecimiento cuando corresponda.
-
         self.calificaciones.registrar_viaje(tipo, tiempo_espera)
 
     # ------------------------------------------------------------------
@@ -110,9 +117,9 @@ class Simulacion:
     # ------------------------------------------------------------------
     def correr(self):
         while self.T<HV:
+            self.T=self.TPLL
             intervalo = generadores.generar_intervalo_arribo(self.rng, self.lambda_arribo)
-            self.T += intervalo
-            self.TPLL = self.T
+            self.TPLL = self.T+intervalo
             self.procesar_solicitud()
 
         self._calcular_metricas_finales()
@@ -129,7 +136,7 @@ class Simulacion:
         if self._cantidad_solicitudes:
             self.PARR = 100 * self._cantidad_arrepentidos / self._cantidad_solicitudes
 
-        self.BN = self._ingresos - self._costos  # costos aún pendientes (ver TODOs)
+        self.BN = self._ingresos - self._costos
 
     def __repr__(self):
         return (

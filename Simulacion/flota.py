@@ -15,10 +15,7 @@ class Flota:
 
     El tiempo ocioso se suma en el momento en que se detecta: cuando un
     taxi recibe un nuevo viaje, la brecha entre que quedó libre y el
-    momento de la asignación es tiempo que estuvo ocioso. Al finalizar la
-    simulación hay que sumar además la "cola" ociosa de cada taxi entre su
-    último viaje y el horizonte HV (ver `finalizar`).
-    """
+    momento de la asignación es tiempo que estuvo ocioso. """
 
     def __init__(self, cantidad_convencionales, cantidad_electricos, cantidad_autonomos):
         cantidades = {

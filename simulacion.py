@@ -67,8 +67,9 @@ class Simulacion:
     # ------------------------------------------------------------------
     def procesar_solicitud(self):
         self._cantidad_solicitudes += 1
+        tipo = "autonomo"
 
-        if not self.calificaciones.pasajero_acepta("autonomo", self.calificaciones.promedio("autonomo")):
+        if not self.calificaciones.pasajero_acepta(tipo, self.calificaciones.promedio("autonomo")):
             tipos, promedios = self.calificaciones.mejor_tipo()
             if self.calificaciones.pasajero_acepta(tipos[0], promedios[0]):
                 tipo = tipos[0]

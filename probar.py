@@ -5,7 +5,7 @@ las métricas finales de cada una.
 Uso: python -m taxis_simulacion.main
 """
 
-from Simulacion.config import (
+from config import (
     CANTIDAD_AUTONOMOS,
     CANTIDAD_CONVENCIONALES,
     CANTIDAD_ELECTRICOS,

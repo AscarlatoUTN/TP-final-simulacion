@@ -51,7 +51,7 @@ class SistemaCalificaciones:
 
     def pasajero_acepta(self, tipo, promedio):
         # Si el mejor calificado es autónomo, primero se filtra por apertura a la tecnología.
-        if tipo == "autonomo" and self.rng.random() >= FILTRO_APERTURA_AUTONOMO:
+        if tipo == "autonomo" and self.rng.random() > FILTRO_APERTURA_AUTONOMO:
             return False
         prob = self._probabilidad_aceptacion(tipo, promedio)
         return self.rng.random() < prob

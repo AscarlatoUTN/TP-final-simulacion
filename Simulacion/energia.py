@@ -5,7 +5,7 @@ Mantiene, para cada tipo de taxi, un array con el nivel de combustible o
 batería de cada vehículo (equivalente a CVC, CVE y CVA del enunciado).
 """
 
-from .config import (
+from config import (
     CAPACIDAD_TANQUE,
     CONSUMO_POR_MILLA,
     NIVEL_TRAS_RECARGA,

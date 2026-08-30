@@ -4,10 +4,10 @@ Simulación evento a evento de la flota de taxis para una franja horaria.
 
 import random
 
-from Simulacion import generadores
-from Simulacion.calificaciones import SistemaCalificaciones
-from Simulacion.flota import Flota
-from Simulacion.energia import Energia
+import generadores
+from calificaciones import SistemaCalificaciones
+from flota import Flota
+from energia import Energia
 
 
 """Variable global de High Value (en segundos) para determinar cuando termina la simulacion"""

@@ -3,7 +3,7 @@ Estado de la flota de taxis: tiempos comprometidos, tiempo ocioso
 acumulado por taxi y disponibilidad.
 """
 
-from Simulacion.config import TIPOS_TAXI
+from config import TIPOS_TAXI
 
 
 class Flota:

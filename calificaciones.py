@@ -57,21 +57,19 @@ class SistemaCalificaciones:
         return self.rng.random() < prob
 
     def _penalizacion_espera(self, espera):
-        minutos = espera / 60
-        if minutos <= 5:
+        if espera <= 300:
             return 0.0
-        if minutos <= 10:
+        if espera <= 600:
             return 0.5
-        if minutos <= 15:
+        if espera <= 900:
             return 1.5
-        return 1.5
+        return
 
     def registrar_viaje(self, tipo, espera):
         """Calcula la calificación del viaje y la agrega a la ventana móvil."""
         penalizacion = self._penalizacion_espera(espera)
         ajuste = AJUSTE_SATISFACCION_TIPO[tipo]
-        # TODO: el enunciado no especifica la distribución del componente
-        error = self.rng.gauss(0, 0.2)
+        error = 0.4 * self.rng.random() - 0.2
         calificacion = max(1.0, min(5.0, 5 - penalizacion + ajuste + error))
         self._historial[tipo].append(calificacion)
         return calificacion

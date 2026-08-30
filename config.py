@@ -2,17 +2,26 @@
 Constantes y parámetros del modelo de simulación de la flota de taxis.
 """
 
+"""Variable global de High Value (en segundos) para determinar cuando termina la simulacion"""
+TF = 80000 # 5 años
+
+# --- Parámetros de la flota, la franja y el horizonte de prueba ---
+CANTIDAD_CONVENCIONALES = [8, 8, 8, 10, 10, 10, 12, 12, 12]
+CANTIDAD_ELECTRICOS =     [18, 18, 18, 20, 20, 20, 22, 22, 22]
+CANTIDAD_AUTONOMOS =      [3, 4, 5, 3, 4, 5, 3, 4, 5]
+FRANJA = "madrugada"  # una de: "madrugada", "manana", "tarde", "noche"
+SEED = None
+
 TIPOS_TAXI = ("convencional", "electrico", "autonomo")
 
 TIPOS_FRANJAS=("madrugada", "manana", "tarde", "noche")
 
-
 # --- Tarifa base según franja horaria (sistema de pago: Pago = B + 2.75*DIS) ---
 TARIFA_BASE_FRANJA = {
-    "madrugada": 3.5,
-    "manana": 4.8,
-    "tarde": 5.1,
-    "noche": 4.3,
+    "madrugada": 4.0,
+    "manana": 3.0,
+    "tarde": 5.5,
+    "noche": 4.0,
 }
 
 # --- Sistema de calificaciones ---
@@ -53,7 +62,7 @@ TABLA_ACEPTACION_AUTONOMO = (
 )
 # --- Parámetros energéticos de vehículos ---
 # El autónomo comparte vehículo con el eléctrico (Model 3), por eso tiene
-# los mismos parámetros de capacidad/consumo/recarga; lo único distinto es
+# los mismos parámetros de capacidad/consumo/reabastecer; lo único distinto es
 # el costo de FSD (ver COSTO_FSD_ANUAL más abajo).
 CAPACIDAD_TANQUE = {
     "convencional": 50.0,  # litros
@@ -67,44 +76,38 @@ CONSUMO_POR_MILLA = {
     "autonomo": 0.26,      # kWh/mi
 }
 
-# Umbral de nivel restante a partir del cual el vehículo debe recargar/reabastecer
-UMBRAL_RECARGA = {
+# Umbral de nivel restante a partir del cual el vehículo debe reabastecer/reabastecer
+UMBRAL_REABASTECIMIENTO = {
     "convencional": 7.5,   # 15% de 50 L
     "electrico": 15.0,     # 20% de 75 kWh
     "autonomo": 15.0,      # 20% de 75 kWh
 }
 
-TIEMPO_RECARGA = {
+TIEMPO_REABASTECIMIENTO = {
     "convencional": 300,   # s (5 min)
     "electrico": 1800,     # s (30 min)
     "autonomo": 1800,      # s (30 min)
 }
 
-# Nivel al que queda el vehículo después de recargar/reabastecer.
+# Nivel al que queda el vehículo después de reabastecer/reabastecer.
 # Convencional llena el tanque completo; eléctrico/autónomo cargan
 # rápido y parcial, del 20% al 80% (0.8 * 75 kWh = 60 kWh).
-NIVEL_TRAS_RECARGA = {
+NIVEL_TRAS_REABASTECIMIENTO = {
     "convencional": 50.0,
     "electrico": 60.0,
     "autonomo": 60.0,
 }
 
-PRECIO_POR_UNIDAD_ENERGIA = {
+PRECIO_POR_UNIDAD_capacidad = {
     "convencional": 0.92,  # USD/L
     "electrico": 0.38,     # USD/kWh
     "autonomo": 0.38,      # USD/kWh
 }
 
 # --- Costos de vehículos (no incorporados aún al cálculo de BN) ---
-# TODO: definir cómo amortizar estos costos fijos sobre el horizonte HV
-# de cada simulación antes de sumarlos al beneficio neto.
 COSTO_ADQUISICION = {
-    "convencional": 23_125,
-    "electrico": 47_000,
-    "autonomo": 47_000,
+    "convencional": 23125,
+    "electrico": 47000,
+    "autonomo": 47000,
 }
-COSTO_FSD_ANUAL = {
-    "convencional": 0,
-    "electrico": 0,
-    "autonomo": 1_200,
-}
+COSTO_FSD_ANUAL = 1_200

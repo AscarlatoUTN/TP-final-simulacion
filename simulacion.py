@@ -7,11 +7,11 @@ import random
 import generadores
 from calificaciones import SistemaCalificaciones
 from flota import Flota
-from energia import Energia
+from capacidad import Capacidad
+import config
 
 
-"""Variable global de High Value (en segundos) para determinar cuando termina la simulacion"""
-HV = 157680000 # 5 años
+
 
 
 class Simulacion:
@@ -41,8 +41,8 @@ class Simulacion:
         self.rng = random.Random(seed)
         self.flota = Flota(cantidad_convencionales, cantidad_electricos, cantidad_autonomos)
         self.calificaciones = SistemaCalificaciones(self.rng)
-        self.energia = Energia(cantidad_convencionales, cantidad_electricos, cantidad_autonomos)
-
+        self.capacidad = Capacidad(cantidad_convencionales, cantidad_electricos, cantidad_autonomos)
+        
         # --- Variables de tiempo de la simulación ---
         self.T = 0.0
         self.TPLL = 0.0
@@ -53,7 +53,8 @@ class Simulacion:
         self._cantidad_solicitudes = 0
         self._cantidad_arrepentidos = 0
         self._ingresos = 0.0
-        self._costos = 0.0
+        self._costos_variables = config.COSTO_FSD_ANUAL * self.flota.cantidades_autonomos * config.TF / (3600 * 24 * 365)
+        self._costos_fijos = config.COSTO_ADQUISICION["convencional"] * self.flota.cantidades_convencionales + config.COSTO_ADQUISICION["electrico"] * (self.flota.cantidades_electricos + self.flota.cantidades_autonomos)
         # --- Métricas finales (se completan al terminar correr()) ---
         self.TPE = 0.0
         self.TPOC = 0.0
@@ -82,6 +83,10 @@ class Simulacion:
 
         esta_disponible_ahora, indice_taxi, tiempo_espera = self.flota.taxi_disponible(tipo, self.T)
 
+        if tiempo_espera > 900:
+            self._cantidad_arrepentidos += 1
+            return
+
         self._suma_esperas += tiempo_espera
 
         dis = generadores.generar_distancia(self.rng)
@@ -91,24 +96,21 @@ class Simulacion:
             # Si esta disponible ahora, significa que hasta entonces el taxi estaba ocioso
             self.flota.tiempo_ocioso[tipo][indice_taxi] += self.T - self.flota.tiempo_comprometido[tipo][indice_taxi]
 
-            inicio_viaje = self.T  # El viaje empieza en ese momento, porque el taxi estaba libre
-            self.flota.tiempo_comprometido[tipo][indice_taxi] = inicio_viaje + tv
+            self.flota.tiempo_comprometido[tipo][indice_taxi] = self.T + tv
         else:
             # Si no esta disponible ahora, significa que el taxi estaba ocupado y el viaje empieza cuando se libera
-            inicio_viaje = self.flota.tiempo_comprometido[tipo][indice_taxi]
-            # El viaje tiene su tiempo comprometido hasta que termine ese viaje
-            self.flota.tiempo_comprometido[tipo][indice_taxi] = inicio_viaje + tv
+            self.flota.tiempo_comprometido[tipo][indice_taxi] = self.T + tv
 
-        # --- Consumo de energía y recarga ---
+        # --- Consumo de energía y reabastecer ---
         # Apenas se sabe la distancia y el tiempo del viaje, se descuenta el
-        # consumo del vehículo y, si cae por debajo del umbral, se recarga.
-        self.energia.consumir(tipo, indice_taxi, dis)
-        if self.energia.necesita_recarga(tipo, indice_taxi):
-            tiempo_recarga, costo_recarga = self.energia.recargar(tipo, indice_taxi)
-            # El tiempo de recarga se suma al tiempo comprometido del vehículo,
+        # consumo del vehículo y, si cae por debajo del umbral, se reabastecer.
+        self.capacidad.consumir(tipo, indice_taxi, dis)
+        if self.capacidad.necesita_reabastecimiento(tipo, indice_taxi):
+            tiempo_reabastecimiento, costo_reabastecimiento = self.capacidad.reabastecer(tipo, indice_taxi)
+            # El tiempo de reabastecer se suma al tiempo comprometido del vehículo,
             # tal como indica el enunciado.
-            self.flota.tiempo_comprometido[tipo][indice_taxi] += tiempo_recarga
-            self._costos += costo_recarga
+            self.flota.tiempo_comprometido[tipo][indice_taxi] += tiempo_reabastecimiento
+            self._costos_variables += costo_reabastecimiento
         self._cantidad_viajes_completados += 1
         pago = self.tarifa_base + 2.75 * dis
         self._ingresos += pago
@@ -118,7 +120,7 @@ class Simulacion:
     # Loop principal de la simulación
     # ------------------------------------------------------------------
     def correr(self):
-        while self.T < HV:
+        while self.T < config.TF:
             self.T = self.TPLL
             intervalo_arribo = generadores.generar_intervalo_arribo(self.rng, self.franja)
             self.TPLL = self.T + intervalo_arribo
@@ -131,6 +133,7 @@ class Simulacion:
         if self._cantidad_viajes_completados:
             self.TPE = self._suma_esperas / self._cantidad_viajes_completados
 
+        self.flota.finalizar(self.T)
         self.TPOC = self.flota.porcentaje_tiempo_ocioso("convencional", self.T) / self.flota.cantidades_convencionales
         self.TPOE = self.flota.porcentaje_tiempo_ocioso("electrico", self.T) / self.flota.cantidades_electricos
         self.TPOA = self.flota.porcentaje_tiempo_ocioso("autonomo", self.T) / self.flota.cantidades_autonomos
@@ -138,7 +141,7 @@ class Simulacion:
         if self._cantidad_solicitudes:
             self.PARR = 100 * self._cantidad_arrepentidos / self._cantidad_solicitudes
 
-        self.BN = self._ingresos - self._costos
+        self.BN = self._ingresos - self._costos_fijos - self._costos_variables
 
     def __repr__(self):
         return (

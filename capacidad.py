@@ -1,5 +1,5 @@
 """
-Consumo de combustible/batería y recarga de la flota.
+Consumo de combustible/batería y reabastecimiento de la flota.
 
 Mantiene, para cada tipo de taxi, un array con el nivel de combustible o
 batería de cada vehículo (equivalente a CVC, CVE y CVA del enunciado).
@@ -8,15 +8,15 @@ batería de cada vehículo (equivalente a CVC, CVE y CVA del enunciado).
 from config import (
     CAPACIDAD_TANQUE,
     CONSUMO_POR_MILLA,
-    NIVEL_TRAS_RECARGA,
-    PRECIO_POR_UNIDAD_ENERGIA,
-    TIEMPO_RECARGA,
+    NIVEL_TRAS_REABASTECIMIENTO,
+    PRECIO_POR_UNIDAD_capacidad,
+    TIEMPO_REABASTECIMIENTO,
     TIPOS_TAXI,
-    UMBRAL_RECARGA,
+    UMBRAL_REABASTECIMIENTO,
 )
 
 
-class Energia:
+class Capacidad:
     """
     nivel[tipo][i] = combustible (L) o batería (kWh) restante del taxi i
     de ese tipo. Arranca con el tanque/batería llenos.
@@ -37,18 +37,18 @@ class Energia:
         """Descuenta el consumo de un viaje de distancia `dis` (millas) al taxi `idx`."""
         self.nivel[tipo][idx] -= CONSUMO_POR_MILLA[tipo] * dis
 
-    def necesita_recarga(self, tipo, idx):
-        return self.nivel[tipo][idx] <= UMBRAL_RECARGA[tipo]
+    def necesita_reabastecimiento(self, tipo, idx):
+        return self.nivel[tipo][idx] <= UMBRAL_REABASTECIMIENTO[tipo]
 
-    def recargar(self, tipo, idx):
+    def reabastecer(self, tipo, idx):
         """
-        Recarga/reabastece el taxi `idx` de `tipo` hasta su nivel post-recarga.
+        reabastecer/reabastece el taxi `idx` de `tipo` hasta su nivel post-reabastecer.
 
-        Devuelve (tiempo_recarga, costo) para que la simulación sume el
+        Devuelve (tiempo_reabastecimiento, costo) para que la simulación sume el
         tiempo al tiempo comprometido del vehículo y el costo al beneficio neto.
         """
         nivel_actual = self.nivel[tipo][idx]
-        nivel_final = NIVEL_TRAS_RECARGA[tipo]
-        costo = (nivel_final - nivel_actual) * PRECIO_POR_UNIDAD_ENERGIA[tipo]
+        nivel_final = NIVEL_TRAS_REABASTECIMIENTO[tipo]
+        costo = (nivel_final - nivel_actual) * PRECIO_POR_UNIDAD_capacidad[tipo]
         self.nivel[tipo][idx] = nivel_final
-        return TIEMPO_RECARGA[tipo], costo
+        return TIEMPO_REABASTECIMIENTO[tipo], costo

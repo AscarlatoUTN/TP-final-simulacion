@@ -3,7 +3,7 @@
 Simulación de eventos discretos de una flota de taxis compuesta por tres
 tipos de vehículos —**convencionales**, **eléctricos** y **autónomos**—,
 compitiendo por pasajeros según su reputación, con consumo de energía,
-recarga/reabastecimiento y cálculo de beneficio neto.
+reabastecer/reabastecimiento y cálculo de beneficio neto.
  
 ## Cómo correrlo
  
@@ -22,7 +22,7 @@ El "panel de control" del modelo: todas las constantes y parámetros en un
 solo lugar. Cantidad de taxis por tipo y tarifa base por franja horaria,
 parámetros del sistema de calificaciones (reputación inicial, tablas de
 aceptación, filtro de apertura a autónomos) y parámetros energéticos
-(capacidad de tanque/batería, consumo, umbral y tiempo de recarga,
+(capacidad de tanque/batería, consumo, umbral y tiempo de reabastecer,
 costos). `TIPOS_FRANJAS` quedó como la lista de las 4 franjas
 horarias (`madrugada`, `manana`, `tarde`, `noche`) que usa `probar.py`
 para iterarlas. Cada franja tiene ahora su propia FDP
@@ -62,22 +62,22 @@ tabla de probabilidad de aceptación por calificación), y calcula la
 calificación de cada viaje completado (`registrar_viaje`, penalizando la
 espera y ajustando según el tipo de vehículo).
  
-### `energia.py`
-La clase `Energia`: mantiene el nivel de combustible/batería de cada
+### `Capacidad.py`
+La clase `Capacidad`: mantiene el nivel de combustible/batería de cada
 vehículo (equivalente a `CVC`, `CVE`, `CVA` del enunciado), uno por taxi.
 Descuenta el consumo de cada viaje según la distancia recorrida
-(`consumir`), detecta cuándo un vehículo cruza el umbral de recarga
-(`necesita_recarga`), y calcula el costo y tiempo fijo de la
-recarga/reabastecimiento (`recargar`).
+(`consumir`), detecta cuándo un vehículo cruza el umbral de reabastecer
+(`necesita_reabastecimiento`), y calcula el costo y tiempo fijo de la
+reabastecer/reabastecimiento (`reabastecer`).
  
 ### `simulacion.py`
 La clase `Simulacion`: el orquestador. No sabe *cómo* se genera una
 distancia, se elige un taxi o se calcula una calificación — solo coordina
-`Flota`, `SistemaCalificaciones` y `Energia` en el loop de eventos
+`Flota`, `SistemaCalificaciones` y `Capacidad` en el loop de eventos
 (`correr`): genera la próxima llegada, procesa la solicitud
 (`procesar_solicitud`: elección + aceptación del servicio, asignación de
-taxi, consumo de energía y recarga, cobro del viaje, calificación) hasta
-llegar al horizonte `HV` (constante global definida en este mismo
+taxi, consumo de energía y reabastecer, cobro del viaje, calificación) hasta
+llegar al horizonte `TF` (constante global definida en este mismo
 archivo), y al final calcula las métricas: `TPE`, `PTOC`, `PTOE`, `PTOA`,
 `PARR` y `BN`.
  

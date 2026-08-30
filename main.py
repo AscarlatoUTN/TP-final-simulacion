@@ -7,19 +7,8 @@ Ejecutalo directo con el botón Run del IDE, o con: python probar.py
 """
 
 import os
-from config import TARIFA_BASE_FRANJA
+import config
 from simulacion import Simulacion
-
-# --- Parámetros de la flota, la franja y el horizonte de prueba ---
-# CANTIDAD_CONVENCIONALES = 10
-# CANTIDAD_ELECTRICOS = 20
-# CANTIDAD_AUTONOMOS = 5
-CANTIDAD_CONVENCIONALES =   [8,  8,  8,  10, 10, 10, 12, 12, 12]
-CANTIDAD_ELECTRICOS =       [18, 18, 18, 20, 20, 20, 22, 22, 22]
-CANTIDAD_AUTONOMOS =        [3,  4,  5,  3,  4,  5,  3,  4,  5]
-FRANJA = "madrugada"  # una de: "madrugada", "manana", "tarde", "noche"
-SEED = None
-
 
 def imprimir_resultado(i, franja, sim, archivo=None):
     ancho = 70
@@ -30,6 +19,20 @@ def imprimir_resultado(i, franja, sim, archivo=None):
         else:
             print(texto)
 
+    # formateadores (estilo español: miles con '.' y decimales con ',')
+    def format_num_es(n):
+        try:
+            return f"{int(n):,}".replace(",", ".")
+        except Exception:
+            return str(n)
+
+    def format_float_es(x, decimals=2):
+        try:
+            s = f"{x:,.{decimals}f}"   # "1,234,567.89"
+            return s.replace(",", "X").replace(".", ",").replace("X", ".")
+        except Exception:
+            return str(x)
+
     escribir()
     escribir("=" * ancho)
     escribir(f"{'SIMULACIÓN DE FLOTA DE TAXIS':^{ancho}}")
@@ -37,19 +40,23 @@ def imprimir_resultado(i, franja, sim, archivo=None):
 
     escribir(f"\n  Franja horaria : {franja.upper()}")
     escribir(f"  Tarifa base    : ${sim.tarifa_base:.2f}")
-    escribir(f"  Configuración  : TC={CANTIDAD_CONVENCIONALES[i]}, TE={CANTIDAD_ELECTRICOS[i]}, TA={CANTIDAD_AUTONOMOS[i]}")
+    escribir(f"  Configuración  : TC={config.CANTIDAD_CONVENCIONALES[i]}, TE={config.CANTIDAD_ELECTRICOS[i]}, TA={config.CANTIDAD_AUTONOMOS[i]}")
     escribir()
 
     escribir("-" * ancho)
     escribir(f"{'RESULTADOS GENERALES':^{ancho}}")
     escribir("-" * ancho)
 
-    escribir(f"  {'Solicitudes totales':<35}: {sim._cantidad_solicitudes:>10}")
-    escribir(f"  {'Viajes completados':<35}: {sim._cantidad_viajes_completados:>10}")
-    escribir(f"  {'Pasajeros arrepentidos':<35}: {sim._cantidad_arrepentidos:>10}")
-    escribir(f"  {'Porcentaje de arrepentimiento':<35}: {sim.PARR:>9.2f} %")
-    escribir(f"  {'Tiempo promedio de espera':<35}: {sim.TPE:>9.2f} s")
-    escribir(f"  {'Beneficio neto':<35}: ${sim.BN:>9.2f}")
+    # líneas con formateo por separado (enteros y floats)
+    escribir(f"  {'Solicitudes totales':<35}: {format_num_es(sim._cantidad_solicitudes):>15}")
+    escribir(f"  {'Viajes completados':<35}: {format_num_es(sim._cantidad_viajes_completados):>15}")
+    escribir(f"  {'Pasajeros arrepentidos':<35}: {format_num_es(sim._cantidad_arrepentidos):>15}")
+    # porcentaje: mantener formato con punto decimal y símbolo %
+    escribir(f"  {'Porcentaje de arrepentimiento':<35}: {sim.PARR:>15.2f} %")
+    # tiempo promedio de espera (float grande) con formateo
+    escribir(f"  {'Tiempo promedio de espera':<35}: {format_float_es(sim.TPE, 2):>15} s")
+    # beneficio neto con separador de miles y coma decimal
+    escribir(f"  {'Beneficio neto':<35}: ${format_float_es(sim.BN, 2):>14}")
     escribir()
 
     escribir("-" * ancho)
@@ -70,6 +77,7 @@ def imprimir_resultado(i, franja, sim, archivo=None):
     ):
         calificacion = sim.calificaciones.promedio(tipo)
 
+        # tiempo_ocioso ya es porcentaje; lo dejamos con formato xx.yy %
         escribir(
             f"  {nombre:<18}"
             f"{tiempo_ocioso:>17.2f} %"
@@ -83,6 +91,8 @@ def imprimir_resultado(i, franja, sim, archivo=None):
     escribir("-" * ancho)
 
     escribir(f"\n  Tiempo comprometido:")
+    # Para imprimir estructuras complejas, convertimos números dentro de ellas si queremos,
+    # pero aquí mantenemos la representación original para legibilidad técnica.
     escribir(f"    {sim.flota.tiempo_comprometido}")
 
     escribir(f"\n  Tiempo ocioso:")
@@ -95,19 +105,20 @@ def imprimir_resultado(i, franja, sim, archivo=None):
     escribir()
 
 
-def probar_simulacion(franja=FRANJA):
+
+def probar_simulacion(franja=config.FRANJA):
 
     carpeta_resultados = os.path.join(os.getcwd(), "resultados")
     os.makedirs(carpeta_resultados, exist_ok=True)
 
-    for i in range(len(CANTIDAD_CONVENCIONALES)):
+    for i in range(len(config.CANTIDAD_CONVENCIONALES)):
         sim = Simulacion(
-            cantidad_convencionales=CANTIDAD_CONVENCIONALES[i],
-            cantidad_electricos=CANTIDAD_ELECTRICOS[i],
-            cantidad_autonomos=CANTIDAD_AUTONOMOS[i],
+            cantidad_convencionales=config.CANTIDAD_CONVENCIONALES[i],
+            cantidad_electricos=config.CANTIDAD_ELECTRICOS[i],
+            cantidad_autonomos=config.CANTIDAD_AUTONOMOS[i],
             franja=franja,
-            tarifa_base=TARIFA_BASE_FRANJA[franja],
-            seed=SEED,
+            tarifa_base=config.TARIFA_BASE_FRANJA[franja],
+            seed=config.SEED,
         )
 
         sim.correr()
@@ -116,7 +127,7 @@ def probar_simulacion(franja=FRANJA):
         with open(nombre_archivo, "w", encoding="utf-8") as f:
             imprimir_resultado(i, franja, sim, archivo=f)
 
-        print(f"{FRANJA}_{i+1} Terminado")
+        print(f"{config.FRANJA}_{i+1} Terminado")
 
 
 if __name__ == "__main__":

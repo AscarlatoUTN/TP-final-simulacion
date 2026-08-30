@@ -6,9 +6,9 @@ Uso: python -m taxis_simulacion.main
 """
 
 from config import (
-    CANTIDAD_AUTONOMOS,
-    CANTIDAD_CONVENCIONALES,
-    CANTIDAD_ELECTRICOS,
+    config.CANTIDAD_AUTONOMOS,
+    config.CANTIDAD_CONVENCIONALES,
+    config.CANTIDAD_ELECTRICOS,
     TARIFA_BASE_FRANJA,
 TIPOS_FRANJAS
 )
@@ -20,9 +20,9 @@ def correr_las_cuatro_franjas(seed=None):
     resultados = {}
     for franja in TIPOS_FRANJAS:
         sim = Simulacion(
-            cantidad_convencionales=CANTIDAD_CONVENCIONALES,
-            cantidad_electricos=CANTIDAD_ELECTRICOS,
-            cantidad_autonomos=CANTIDAD_AUTONOMOS,
+            cantidad_convencionales=config.CANTIDAD_CONVENCIONALES,
+            cantidad_electricos=config.CANTIDAD_ELECTRICOS,
+            cantidad_autonomos=config.CANTIDAD_AUTONOMOS,
             franja=franja,
             tarifa_base=TARIFA_BASE_FRANJA[franja],
             seed=seed,

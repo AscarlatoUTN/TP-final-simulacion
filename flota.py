@@ -48,17 +48,15 @@ class Flota:
             return True, idx_min, 0.0
         return False, idx_min, tiempo_libre - T
 
-
-
-    def finalizar(self, HV):
+    def finalizar(self, TF):
         """
         Suma el tiempo ocioso final de cada taxi: desde que terminó su
-        último viaje hasta el horizonte HV. Se llama una sola vez, al
+        último viaje hasta el horizonte TF. Se llama una sola vez, al
         terminar la simulación.
         """
         for tipo in TIPOS_TAXI:
             for i, tiempo_libre in enumerate(self.tiempo_comprometido[tipo]):
-                self.tiempo_ocioso[tipo][i] += max(0.0, HV - tiempo_libre)
+                self.tiempo_ocioso[tipo][i] += max(0.0, TF - tiempo_libre)
 
     def porcentaje_tiempo_ocioso(self, tipo,tiempo_final):
         """

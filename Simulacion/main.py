@@ -6,7 +6,7 @@ simple vista.
 Ejecutalo directo con el botón Run del IDE, o con: python probar.py
 """
 
-from config import LAMBDAS_FRANJA, TARIFA_BASE_FRANJA
+from config import TARIFA_BASE_FRANJA
 from simulacion import Simulacion
 
 # --- Parámetros hardcodeados de la flota, la franja y el horizonte de prueba ---
@@ -14,7 +14,7 @@ CANTIDAD_CONVENCIONALES = 2
 CANTIDAD_ELECTRICOS = 2
 CANTIDAD_AUTONOMOS = 1
 FRANJA = "madrugada"  # una de: "madrugada", "manana", "tarde", "noche"
-SEED = 1
+SEED = None
 
 
 def imprimir_resultado(franja, sim):
@@ -26,7 +26,6 @@ def imprimir_resultado(franja, sim):
     print("=" * ancho)
 
     print(f"\n  Franja horaria : {franja.upper()}")
-    print(f"  Lambda         : {sim.lambda_arribo}")
     print(f"  Tarifa base    : ${sim.tarifa_base:.2f}")
     print()
 
@@ -93,7 +92,7 @@ def probar_simulacion(franja=FRANJA):
         cantidad_convencionales=CANTIDAD_CONVENCIONALES,
         cantidad_electricos=CANTIDAD_ELECTRICOS,
         cantidad_autonomos=CANTIDAD_AUTONOMOS,
-        lambda_arribo=LAMBDAS_FRANJA[franja],
+        franja=franja,
         tarifa_base=TARIFA_BASE_FRANJA[franja],
         seed=SEED,
     )

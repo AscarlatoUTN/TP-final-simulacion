@@ -4,19 +4,13 @@ Constantes y parámetros del modelo de simulación de la flota de taxis.
 
 TIPOS_TAXI = ("convencional", "electrico", "autonomo")
 
+TIPOS_FRANJAS=("madrugada", "manana", "tarde", "noche")
+
 # --- Cantidad de taxis por tipo (ajustables según el escenario a simular) ---
 CANTIDAD_CONVENCIONALES = 10
 CANTIDAD_ELECTRICOS = 10
 CANTIDAD_AUTONOMOS = 10
 
-# --- Parámetros lambda de la FDP Exponencial de intervalo entre arribos ---
-# IA = -ln(R) / lambda,  R ~ U(0,1)
-LAMBDAS_FRANJA = {
-    "madrugada": 0.1458,
-    "manana": 0.3093,
-    "tarde": 0.3403,
-    "noche": 0.3709,
-}
 
 # --- Tarifa base según franja horaria (sistema de pago: Pago = B + 2.75*DIS) ---
 TARIFA_BASE_FRANJA = {

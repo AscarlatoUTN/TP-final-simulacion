@@ -60,8 +60,6 @@ class SistemaCalificaciones:
             return 0.5
         if minutos <= 15:
             return 1.5
-        # TODO: el enunciado no define penalización para esperas > 15 min;
-        # por ahora se usa el tramo máximo de la tabla.
         return 1.5
 
     def registrar_viaje(self, tipo, espera):
@@ -69,7 +67,6 @@ class SistemaCalificaciones:
         penalizacion = self._penalizacion_espera(espera)
         ajuste = AJUSTE_SATISFACCION_TIPO[tipo]
         # TODO: el enunciado no especifica la distribución del componente
-        # aleatorio del pasajero; se usa una Normal(0, 0.2) como placeholder.
         error = self.rng.gauss(0, 0.2)
         calificacion = max(1.0, min(5.0, 5 - penalizacion + ajuste + error))
         self._historial[tipo].append(calificacion)

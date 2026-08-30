@@ -10,7 +10,9 @@ from Simulacion.flota import Flota
 from Simulacion.energia import Energia
 
 
-HV=9999
+"""Variable global de High Value (en segundos) para determinar cuando termina la simulacion"""
+HV = 9999
+
 
 class Simulacion:
     """
@@ -18,31 +20,25 @@ class Simulacion:
     ----------
     cantidad_convencionales, cantidad_electricos, cantidad_autonomos : int
         Cantidad de taxis de cada tipo.
-    lambda_arribo : float
-        Parámetro lambda de la Exponencial que genera el intervalo entre
-        arribos (IA) para la franja horaria simulada.
-    HV : float
-        Horizonte de la simulación, en segundos. La simulación corre
-        mientras T < HV.
     tarifa_base : float
+        Franja horaria de la simulación, que determina la FDP del intervalo de arribo entre solicitudes y la tarifa base
         Tarifa base (B) del sistema de pago, según la franja horaria.
     seed : int | None
         Semilla del generador aleatorio, para reproducibilidad.
     """
 
     def __init__(
-        self,
-        cantidad_convencionales,
-        cantidad_electricos,
-        cantidad_autonomos,
-        lambda_arribo,
-        tarifa_base=0.0,
-        seed=None,
+            self,
+            cantidad_convencionales,
+            cantidad_electricos,
+            cantidad_autonomos,
+            franja,
+            tarifa_base=0.0,
+            seed=None,
     ):
-        self.lambda_arribo = lambda_arribo
+        self.franja = franja
         self.tarifa_base = tarifa_base
         self.rng = random.Random(seed)
-
         self.flota = Flota(cantidad_convencionales, cantidad_electricos, cantidad_autonomos)
         self.calificaciones = SistemaCalificaciones(self.rng)
         self.energia = Energia(cantidad_convencionales, cantidad_electricos, cantidad_autonomos)
@@ -78,7 +74,7 @@ class Simulacion:
             self._cantidad_arrepentidos += 1
             return
 
-        esta_disponible_ahora,indice_taxi, tiempo_espera = self.flota.taxi_disponible(tipo, self.T)
+        esta_disponible_ahora, indice_taxi, tiempo_espera = self.flota.taxi_disponible(tipo, self.T)
 
         self._suma_esperas += tiempo_espera
 
@@ -87,15 +83,15 @@ class Simulacion:
 
         if esta_disponible_ahora:
             # Si esta disponible ahora, significa que hasta entonces el taxi estaba ocioso
-            self.flota.tiempo_ocioso[tipo][indice_taxi]+= self.T - self.flota.tiempo_comprometido[tipo][indice_taxi]
+            self.flota.tiempo_ocioso[tipo][indice_taxi] += self.T - self.flota.tiempo_comprometido[tipo][indice_taxi]
 
-            inicio_viaje=self.T # El viaje empieza en ese momento, porque el taxi estaba libre
-            self.flota.tiempo_comprometido[tipo][indice_taxi]=inicio_viaje+tv
+            inicio_viaje = self.T  # El viaje empieza en ese momento, porque el taxi estaba libre
+            self.flota.tiempo_comprometido[tipo][indice_taxi] = inicio_viaje + tv
         else:
             # Si no esta disponible ahora, significa que el taxi estaba ocupado y el viaje empieza cuando se libera
-            inicio_viaje=self.flota.tiempo_comprometido[tipo][indice_taxi]
+            inicio_viaje = self.flota.tiempo_comprometido[tipo][indice_taxi]
             # El viaje tiene su tiempo comprometido hasta que termine ese viaje
-            self.flota.tiempo_comprometido[tipo][indice_taxi]=inicio_viaje+tv
+            self.flota.tiempo_comprometido[tipo][indice_taxi] = inicio_viaje + tv
 
         # --- Consumo de energía y recarga ---
         # Apenas se sabe la distancia y el tiempo del viaje, se descuenta el
@@ -116,10 +112,10 @@ class Simulacion:
     # Loop principal de la simulación
     # ------------------------------------------------------------------
     def correr(self):
-        while self.T<HV:
-            self.T=self.TPLL
-            intervalo = generadores.generar_intervalo_arribo(self.rng, self.lambda_arribo)
-            self.TPLL = self.T+intervalo
+        while self.T < HV:
+            self.T = self.TPLL
+            intervalo = generadores.generar_intervalo_arribo(self.rng, self.franja)
+            self.TPLL = self.T + intervalo
             self.procesar_solicitud()
 
         self._calcular_metricas_finales()

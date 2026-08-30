@@ -114,8 +114,8 @@ class Simulacion:
     def correr(self):
         while self.T < HV:
             self.T = self.TPLL
-            intervalo = generadores.generar_intervalo_arribo(self.rng, self.franja)
-            self.TPLL = self.T + intervalo
+            intervalo_arribo = generadores.generar_intervalo_arribo(self.rng, self.franja)
+            self.TPLL = self.T + intervalo_arribo
             self.procesar_solicitud()
 
         self._calcular_metricas_finales()

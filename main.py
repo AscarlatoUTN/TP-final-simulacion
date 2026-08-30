@@ -6,18 +6,22 @@ simple vista.
 Ejecutalo directo con el botón Run del IDE, o con: python probar.py
 """
 
+import os
 from config import TARIFA_BASE_FRANJA
 from simulacion import Simulacion
 
-# --- Parámetros hardcodeados de la flota, la franja y el horizonte de prueba ---
-CANTIDAD_CONVENCIONALES = 10
-CANTIDAD_ELECTRICOS = 20
-CANTIDAD_AUTONOMOS = 5
+# --- Parámetros de la flota, la franja y el horizonte de prueba ---
+# CANTIDAD_CONVENCIONALES = 10
+# CANTIDAD_ELECTRICOS = 20
+# CANTIDAD_AUTONOMOS = 5
+CANTIDAD_CONVENCIONALES =   [8,  8,  8,  10, 10, 10, 12, 12, 12]
+CANTIDAD_ELECTRICOS =       [18, 18, 18, 20, 20, 20, 22, 22, 22]
+CANTIDAD_AUTONOMOS =        [3,  4,  5,  3,  4,  5,  3,  4,  5]
 FRANJA = "madrugada"  # una de: "madrugada", "manana", "tarde", "noche"
 SEED = None
 
 
-def imprimir_resultado(franja, sim, archivo=None):
+def imprimir_resultado(i, franja, sim, archivo=None):
     ancho = 70
 
     def escribir(texto=""):
@@ -33,6 +37,7 @@ def imprimir_resultado(franja, sim, archivo=None):
 
     escribir(f"\n  Franja horaria : {franja.upper()}")
     escribir(f"  Tarifa base    : ${sim.tarifa_base:.2f}")
+    escribir(f"  Configuración  : TC={CANTIDAD_CONVENCIONALES[i]}, TE={CANTIDAD_ELECTRICOS[i]}, TA={CANTIDAD_AUTONOMOS[i]}")
     escribir()
 
     escribir("-" * ancho)
@@ -83,9 +88,6 @@ def imprimir_resultado(franja, sim, archivo=None):
     escribir(f"\n  Tiempo ocioso:")
     escribir(f"    {sim.flota.tiempo_ocioso}")
 
-    escribir(f"\n  Nivel de energía:")
-    escribir(f"    {sim.energia.nivel}")
-
     escribir()
     escribir("=" * ancho)
     escribir(f"{'FIN DE LA SIMULACIÓN':^{ancho}}")
@@ -94,18 +96,27 @@ def imprimir_resultado(franja, sim, archivo=None):
 
 
 def probar_simulacion(franja=FRANJA):
-    sim = Simulacion(
-        cantidad_convencionales=CANTIDAD_CONVENCIONALES,
-        cantidad_electricos=CANTIDAD_ELECTRICOS,
-        cantidad_autonomos=CANTIDAD_AUTONOMOS,
-        franja=franja,
-        tarifa_base=TARIFA_BASE_FRANJA[franja],
-        seed=SEED,
-    )
-    sim.correr()
-    # Abrimos el archivo y pasamos el manejador a imprimir_resultado
-    with open("resultados.txt", "w", encoding="utf-8") as f:
-        imprimir_resultado(franja, sim, archivo=f)
+
+    carpeta_resultados = os.path.join(os.getcwd(), "resultados")
+    os.makedirs(carpeta_resultados, exist_ok=True)
+
+    for i in range(len(CANTIDAD_CONVENCIONALES)):
+        sim = Simulacion(
+            cantidad_convencionales=CANTIDAD_CONVENCIONALES[i],
+            cantidad_electricos=CANTIDAD_ELECTRICOS[i],
+            cantidad_autonomos=CANTIDAD_AUTONOMOS[i],
+            franja=franja,
+            tarifa_base=TARIFA_BASE_FRANJA[franja],
+            seed=SEED,
+        )
+
+        sim.correr()
+        # Abrimos el archivo y pasamos el manejador a imprimir_resultado
+        nombre_archivo = os.path.join(carpeta_resultados, f"{franja}_{i+1}.txt")
+        with open(nombre_archivo, "w", encoding="utf-8") as f:
+            imprimir_resultado(i, franja, sim, archivo=f)
+
+        print(f"{FRANJA}_{i+1} Terminado")
 
 
 if __name__ == "__main__":

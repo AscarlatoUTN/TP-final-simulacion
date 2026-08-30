@@ -11,7 +11,7 @@ from energia import Energia
 
 
 """Variable global de High Value (en segundos) para determinar cuando termina la simulacion"""
-HV = 999999
+HV = 157680000 # 5 años
 
 
 class Simulacion:

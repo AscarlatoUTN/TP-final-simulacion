@@ -6,6 +6,11 @@ TIPOS_TAXI = ("convencional", "electrico", "autonomo")
 
 TIPOS_FRANJAS=("madrugada", "manana", "tarde", "noche")
 
+# --- Cantidad de taxis por tipo (ajustables según el escenario a simular) ---
+CANTIDAD_CONVENCIONALES = 10
+CANTIDAD_ELECTRICOS = 20
+CANTIDAD_AUTONOMOS = 5
+
 
 # --- Tarifa base según franja horaria (sistema de pago: Pago = B + 2.75*DIS) ---
 TARIFA_BASE_FRANJA = {

@@ -23,9 +23,6 @@ class Flota:
             "electrico": cantidad_electricos,
             "autonomo": cantidad_autonomos,
         }
-        self.cantidades_convencionales = cantidad_convencionales
-        self.cantidades_electricos = cantidad_electricos
-        self.cantidades_autonomos = cantidad_autonomos
         self.cantidades = cantidades
         self.tiempo_comprometido = {tipo: [0.0] * cantidades[tipo] for tipo in TIPOS_TAXI}
         self.tiempo_ocioso = {tipo: [0.0] * cantidades[tipo] for tipo in TIPOS_TAXI}

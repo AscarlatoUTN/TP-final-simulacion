@@ -34,13 +34,9 @@ class SistemaCalificaciones:
 
     def mejor_tipo(self):
         """El pasajero siempre intenta primero el servicio mejor calificado."""
-        tipos_disponibles = [tipo for tipo in TIPOS_TAXI if tipo != "autonomo"]
-        promedios = {tipo: self.promedio(tipo) for tipo in tipos_disponibles}
-        
-        ranked = sorted(promedios.items(), key=lambda x: x[1], reverse=True)
-        tipos_ordenados = [t for t, _ in ranked]
-        promedios_ordenados = [p for _, p in ranked]
-        return tipos_ordenados, promedios_ordenados
+        promedios = {tipo: self.promedio(tipo) for tipo in TIPOS_TAXI}
+        mejor_tipo = max(promedios, key=promedios.get)
+        return mejor_tipo, promedios[mejor_tipo]
 
     def _probabilidad_aceptacion(self, tipo, promedio):
         tabla = TABLA_ACEPTACION_AUTONOMO if tipo == "autonomo" else TABLA_ACEPTACION_CON_ELEC

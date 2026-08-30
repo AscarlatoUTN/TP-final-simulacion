@@ -10,9 +10,9 @@ from config import TARIFA_BASE_FRANJA
 from simulacion import Simulacion
 
 # --- Parámetros hardcodeados de la flota, la franja y el horizonte de prueba ---
-CANTIDAD_CONVENCIONALES = 10
-CANTIDAD_ELECTRICOS = 20
-CANTIDAD_AUTONOMOS = 5
+CANTIDAD_CONVENCIONALES = 2
+CANTIDAD_ELECTRICOS = 2
+CANTIDAD_AUTONOMOS = 1
 FRANJA = "madrugada"  # una de: "madrugada", "manana", "tarde", "noche"
 SEED = None
 

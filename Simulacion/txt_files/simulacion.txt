@@ -11,7 +11,7 @@ from energia import Energia
 
 
 """Variable global de High Value (en segundos) para determinar cuando termina la simulacion"""
-HV = 999999
+HV = 315360000 / 2
 
 
 class Simulacion:
@@ -68,16 +68,11 @@ class Simulacion:
     def procesar_solicitud(self):
         self._cantidad_solicitudes += 1
 
-        if not self.calificaciones.pasajero_acepta("autonomo", self.calificaciones.promedio("autonomo")):
-            tipos, promedios = self.calificaciones.mejor_tipo()
-            if self.calificaciones.pasajero_acepta(tipos[0], promedios[0]):
-                tipo = tipos[0]
-            elif self.calificaciones.pasajero_acepta(tipos[1], promedios[1]):
-                tipo = tipos[1]
-            else:
-                # El pasajero abandona: por su misma naturaleza, no prueba otro servicio.
-                self._cantidad_arrepentidos += 1
-                return
+        tipo, promedio = self.calificaciones.mejor_tipo()
+        if not self.calificaciones.pasajero_acepta(tipo, promedio):
+            # El pasajero abandona: por su misma naturaleza, no prueba otro servicio.
+            self._cantidad_arrepentidos += 1
+            return
 
         esta_disponible_ahora, indice_taxi, tiempo_espera = self.flota.taxi_disponible(tipo, self.T)
 
@@ -130,9 +125,9 @@ class Simulacion:
         if self._cantidad_viajes_completados:
             self.TPE = self._suma_esperas / self._cantidad_viajes_completados
 
-        self.TPOC = self.flota.porcentaje_tiempo_ocioso("convencional", self.T) / self.flota.cantidades_convencionales
-        self.TPOE = self.flota.porcentaje_tiempo_ocioso("electrico", self.T) / self.flota.cantidades_electricos
-        self.TPOA = self.flota.porcentaje_tiempo_ocioso("autonomo", self.T) / self.flota.cantidades_autonomos
+        self.TPOC = self.flota.porcentaje_tiempo_ocioso("convencional", self.T)
+        self.TPOE = self.flota.porcentaje_tiempo_ocioso("electrico", self.T)
+        self.TPOA = self.flota.porcentaje_tiempo_ocioso("autonomo", self.T)
 
         if self._cantidad_solicitudes:
             self.PARR = 100 * self._cantidad_arrepentidos / self._cantidad_solicitudes

@@ -57,9 +57,9 @@ class Flota:
             for i, tiempo_libre in enumerate(self.tiempo_comprometido[tipo]):
                 self.tiempo_ocioso[tipo][i] += max(0.0, HV - tiempo_libre)
 
-    def tiempo_ocioso_promedio(self, tipo,tiempo_final):
+    def porcentaje_tiempo_ocioso(self, tipo,tiempo_final):
         """
-        Porcentaje promedio de tiempo ocioso de los taxis de `tipo`,
+        Porcentaje de tiempo ocioso de los taxis de `tipo`,
         respecto del tiempo final (llamar después de `finalizar`).
         """
         array = self.tiempo_ocioso[tipo]

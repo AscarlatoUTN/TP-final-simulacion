@@ -125,9 +125,9 @@ class Simulacion:
         if self._cantidad_viajes_completados:
             self.TPE = self._suma_esperas / self._cantidad_viajes_completados
 
-        self.TPOC = self.flota.tiempo_ocioso_promedio("convencional", self.T)
-        self.TPOE = self.flota.tiempo_ocioso_promedio("electrico", self.T)
-        self.TPOA = self.flota.tiempo_ocioso_promedio("autonomo", self.T)
+        self.TPOC = self.flota.porcentaje_tiempo_ocioso("convencional", self.T)
+        self.TPOE = self.flota.porcentaje_tiempo_ocioso("electrico", self.T)
+        self.TPOA = self.flota.porcentaje_tiempo_ocioso("autonomo", self.T)
 
         if self._cantidad_solicitudes:
             self.PARR = 100 * self._cantidad_arrepentidos / self._cantidad_solicitudes

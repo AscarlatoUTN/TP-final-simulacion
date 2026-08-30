@@ -98,7 +98,7 @@ NIVEL_TRAS_REABASTECIMIENTO = {
     "autonomo": 60.0,
 }
 
-PRECIO_POR_UNIDAD_capacidad = {
+PRECIO_POR_UNIDAD_CAPACIDAD = {
     "convencional": 0.92,  # USD/L
     "electrico": 0.38,     # USD/kWh
     "autonomo": 0.38,      # USD/kWh

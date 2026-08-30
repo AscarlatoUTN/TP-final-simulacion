@@ -9,7 +9,7 @@ from config import (
     CAPACIDAD_TANQUE,
     CONSUMO_POR_MILLA,
     NIVEL_TRAS_REABASTECIMIENTO,
-    PRECIO_POR_UNIDAD_capacidad,
+    PRECIO_POR_UNIDAD_CAPACIDAD,
     TIEMPO_REABASTECIMIENTO,
     TIPOS_TAXI,
     UMBRAL_REABASTECIMIENTO,
@@ -49,6 +49,6 @@ class Capacidad:
         """
         nivel_actual = self.nivel[tipo][idx]
         nivel_final = NIVEL_TRAS_REABASTECIMIENTO[tipo]
-        costo = (nivel_final - nivel_actual) * PRECIO_POR_UNIDAD_capacidad[tipo]
+        costo = (nivel_final - nivel_actual) * PRECIO_POR_UNIDAD_CAPACIDAD[tipo]
         self.nivel[tipo][idx] = nivel_final
         return TIEMPO_REABASTECIMIENTO[tipo], costo

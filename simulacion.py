@@ -10,10 +10,6 @@ from flota import Flota
 from capacidad import Capacidad
 import config
 
-
-
-
-
 class Simulacion:
     """
     Parámetros

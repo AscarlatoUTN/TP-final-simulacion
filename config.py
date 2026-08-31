@@ -3,7 +3,7 @@ Constantes y parámetros del modelo de simulación de la flota de taxis.
 """
 
 """Variable global de High Value (en segundos) para determinar cuando termina la simulacion"""
-TF = 80000 # 5 años
+TF = 3600 * 24 * 365 * 5 # 5 años
 
 # --- Parámetros de la flota, la franja y el horizonte de prueba ---
 CANTIDAD_CONVENCIONALES = [8, 8, 8, 10, 10, 10, 12, 12, 12]

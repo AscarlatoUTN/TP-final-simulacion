@@ -9,6 +9,8 @@ Ejecutalo directo con el botón Run del IDE, o con: python probar.py
 import os
 import config
 from simulacion import Simulacion
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
 
 def imprimir_resultado(i, franja, sim, archivo=None):
     ancho = 70
@@ -106,29 +108,34 @@ def imprimir_resultado(i, franja, sim, archivo=None):
 
 
 
-def probar_simulacion(franja=config.FRANJA):
+def ejecutar_simulacion(i, franja):
+    sim = Simulacion(
+        cantidad_convencionales=config.CANTIDAD_CONVENCIONALES[i],
+        cantidad_electricos=config.CANTIDAD_ELECTRICOS[i],
+        cantidad_autonomos=config.CANTIDAD_AUTONOMOS[i],
+        franja=franja,
+        tarifa_base=config.TARIFA_BASE_FRANJA[franja],
+        seed=config.SEED,
+    )
+    sim.correr()
+    return i, sim
 
-    carpeta_resultados = os.path.join(os.getcwd(), "resultados")
-    os.makedirs(carpeta_resultados, exist_ok=True)
+def guardar_resultado(i, franja, sim):
+    # Crear carpeta si no existe
+    os.makedirs("resultados", exist_ok=True)
+    # Guardar cada resultado en un archivo distinto
+    nombre_archivo = f"resultados/{franja}_{i+1}.txt"
+    with open(nombre_archivo, "w") as f:
+        f.write(str(sim))  # Ajusta según cómo quieras serializar el objeto
 
-    for i in range(len(config.CANTIDAD_CONVENCIONALES)):
-        sim = Simulacion(
-            cantidad_convencionales=config.CANTIDAD_CONVENCIONALES[i],
-            cantidad_electricos=config.CANTIDAD_ELECTRICOS[i],
-            cantidad_autonomos=config.CANTIDAD_AUTONOMOS[i],
-            franja=franja,
-            tarifa_base=config.TARIFA_BASE_FRANJA[franja],
-            seed=config.SEED,
-        )
-
-        sim.correr()
-        # Abrimos el archivo y pasamos el manejador a imprimir_resultado
-        nombre_archivo = os.path.join(carpeta_resultados, f"{franja}_{i+1}.txt")
-        with open(nombre_archivo, "w", encoding="utf-8") as f:
-            imprimir_resultado(i, franja, sim, archivo=f)
-
-        print(f"{config.FRANJA}_{i+1} Terminado")
-
+def probar_simulacion_paralelo(franja=config.FRANJA):
+    with ProcessPoolExecutor() as executor:
+        futuros = [executor.submit(ejecutar_simulacion, i, franja)
+                   for i in range(len(config.CANTIDAD_CONVENCIONALES))]
+        for futuro in as_completed(futuros):
+            i, sim = futuro.result()
+            guardar_resultado(i, franja, sim)  # aquí se escribe el archivo
+            print(f"{franja}_{i+1} Terminado")    
 
 if __name__ == "__main__":
-    probar_simulacion()
+    probar_simulacion_paralelo()

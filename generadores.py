@@ -64,11 +64,20 @@ def generar_intervalo_arribo(rng, franja):
 
 
 def generar_distancia(rng):
-    """DIS = e^(0.74275 + 0.84577 * Phi^-1(P)), P = 0.0448 + 0.9544*R"""
+    """
+    DIS ~ Lognormal, ajustada con scipy.stats.lognorm.fit(...).
+    Parámetros (s, loc, scale) = (0.9293763600194365, 0, 1.8580729103281197).
+
+    Generada por el método de la inversa: DIS = loc + scale * e^(s * Phi^-1(R)),
+    con R ~ U(0,1) y Phi la CDF de la normal estándar.
+    """
+    S = 0.9293763600194365
+    LOC = 0.0
+    SCALE = 1.8580729103281197
+
     R = rng.random()
-    P = 0.0448 + 0.9544 * R
-    z = NormalDist().inv_cdf(P)
-    return math.exp(0.74275 + 0.84577 * z)
+    z = NormalDist().inv_cdf(R)
+    return LOC + SCALE * math.exp(S * z)
 
 
 def tiempo_viaje(dis):

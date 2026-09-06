@@ -37,7 +37,7 @@ combinadas en `generar_intervalo_arribo(rng, franja)` según el nombre de
 la franja. `madrugada` y `noche` usan una Exponencial desplazada (método
 de la inversa), `tarde` una distribución de potencia inversa, y `manana`
 usa **aceptación-rechazo** (genera candidatos hasta que uno cae bajo la
-curva de densidad objetivo). La distancia del viaje (`DIS`, Lognormal) y
+curva de densidad objetivo). La distancia del viaje (DIS) usa una Lognormal ajustada con scipy.stats.lognorm (parámetros s=0.9294, loc=0, scale=1.8581), generada por el método de la inversa: DIS = scale · e^(s·Φ⁻¹(R)) y
 el tiempo de viaje en función de la distancia (`TV = 480 + 144·DIS`) siguen
 siendo los mismos para las 4 franjas. Todas las funciones reciben el
 generador `rng` como parámetro en vez de usar uno global, para que la

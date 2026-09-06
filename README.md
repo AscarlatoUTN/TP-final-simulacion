@@ -97,21 +97,16 @@ flota chica y semilla fija, reusando el formato de impresión de `main.py`
 para cada una. Es el archivo para comparar rápido cómo cambia el
 comportamiento de la simulación entre madrugada, mañana, tarde y noche.
  
-## Supuestos y pendientes (TODO)
- 
-Cosas que el enunciado no especifica del todo y quedaron con un valor
-placeholder, marcadas también como `# TODO` en el código:
- 
+## Consideraciones adicionales
+
 - **Distribución del componente aleatorio de la calificación** (`error` en
-  `calificaciones.py`): se usa una Normal(0, 0.2).
-- **Penalización por espera > 15 minutos**: se usa el mismo valor que el
-  tramo 10-15 min (1.5), porque la tabla del enunciado no define ese caso.
-  Ojo: esto genera un "efecto meseta" donde esperar 16 minutos o 2 horas
-  califica igual de mal — puede valer la pena revisarlo si la flota
-  simulada queda muy desbordada.
+  `calificaciones.py`): se usa una función equiprobable entre 1 y 5 estrellas
+- **Espera > 15 minutos**: en caso de que el usuario deba esperar más de 15 minutos,
+  desiste de tomar el viaje. Caso contrario, lo toma y la penalización en la calificación
+  dependerá de ese tiempo.
 - **Nivel inicial de combustible/batería**: todos los vehículos arrancan
   con el tanque/batería llenos al inicio de cada simulación.
 - **Costos de adquisición y FSD anual** (`COSTO_ADQUISICION`,
-  `COSTO_FSD_ANUAL` en `config.py`): están definidos pero todavía no se
-  restan de `BN` — falta decidir cómo amortizarlos sobre el horizonte de
-  la simulación.
+  `COSTO_FSD_ANUAL` en `config.py`): Son dos valores que representan costos.
+   Para calcular el `BN' , a los ingresos generados por el pago de los clientes se les descuenta estos dos costos
+  y el costo asociado a los gastos en combustibles 

@@ -13,29 +13,14 @@ def generar_ia_1(rng):
     return 0.5 - 1.5546 * math.log(1-R)
 
 def generar_ia_2(rng):
-    """
-    Genera un intervalo entre arribos IA_2 mediante aceptación-rechazo.
-    """
-    M = 1.1956
 
-    while True:
-        R1 = rng.random()
-        R2 = rng.random()
+    MU = -0.5436
+    SIGMA = 0.7773995111909964
+    OFFSET = 0.4145
 
-        X = 0.4145 + 3482.5855 * R1
-        Y = M * R2
-
-        f_x = (
-                1
-                / (1.9486 * (X - 0.4145))
-                * math.exp(
-            -((math.log(X - 0.4145) + 0.5436) ** 2)
-            / 1.2087
-        )
-        )
-
-        if Y <= f_x:
-            return X
+    R = rng.random()
+    z = NormalDist().inv_cdf(R)
+    return OFFSET + math.exp(MU + SIGMA * z)
 
 def generar_ia_3(rng):
     R = rng.random()

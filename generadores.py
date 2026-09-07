@@ -10,7 +10,7 @@ from statistics import NormalDist
 
 def generar_ia_1(rng):
     R = rng.random()
-    return 0.5 - 1.5546 * math.log(R)
+    return 0.5 - 1.5546 * math.log(1-R)
 
 def generar_ia_2(rng):
     """
@@ -39,11 +39,11 @@ def generar_ia_2(rng):
 
 def generar_ia_3(rng):
     R = rng.random()
-    return -8.6538 + 9.1538 * R ** (-1 / 15.2479)
+    return -8.6539 + 9.1539 * (1-R) ** (-1 / 15.2479)
 
 def generar_ia_4(rng):
     R = rng.random()
-    return 0.5 - 0.7335 * math.log(R)
+    return 0.5 - 0.7335 * math.log(1-R)
 
 
 def generar_intervalo_arribo(rng, franja):

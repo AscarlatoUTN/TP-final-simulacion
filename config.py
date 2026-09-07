@@ -6,10 +6,10 @@ Constantes y parámetros del modelo de simulación de la flota de taxis.
 TF = 3600 * 24 * 365 * 5 # 5 años
 
 # --- Parámetros de la flota, la franja y el horizonte de prueba ---
-CANTIDAD_CONVENCIONALES = [8, 8, 8, 10, 10, 10, 12, 12, 12]
-CANTIDAD_ELECTRICOS =     [18, 18, 18, 20, 20, 20, 22, 22, 22]
-CANTIDAD_AUTONOMOS =      [3, 4, 5, 3, 4, 5, 3, 4, 5]
-FRANJA = "madrugada"  # una de: "madrugada", "manana", "tarde", "noche"
+CANTIDAD_CONVENCIONALES = [8, 8, 8, 10, 10, 10, 12, 12, 12, 14, 14, 14]
+CANTIDAD_ELECTRICOS =     [18, 18, 18, 20, 20, 20, 22, 22, 22, 24, 24, 24]
+CANTIDAD_AUTONOMOS =      [3, 4, 5, 3, 4, 5, 3, 4, 5, 3, 4, 5]
+FRANJA = "noche"  # una de: "madrugada", "manana", "tarde", "noche"
 SEED = None
 
 TIPOS_TAXI = ("convencional", "electrico", "autonomo")

@@ -10,6 +10,7 @@ import os
 import config
 from simulacion import Simulacion
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from datetime import datetime
 
 
 def imprimir_resultado(i, franja, sim, archivo=None):
@@ -125,17 +126,21 @@ def guardar_resultado(i, franja, sim):
     os.makedirs("resultados", exist_ok=True)
     # Guardar cada resultado en un archivo distinto
     nombre_archivo = f"resultados/{franja}_{i+1}.txt"
-    with open(nombre_archivo, "w") as f:
-        f.write(str(sim))  # Ajusta según cómo quieras serializar el objeto
+    with open(nombre_archivo, "w", encoding="utf-8") as f:
+        imprimir_resultado(i, franja, sim, archivo=f)  # Ajusta según cómo quieras serializar el objeto
 
 def probar_simulacion_paralelo(franja=config.FRANJA):
-    with ProcessPoolExecutor() as executor:
+    print("Inicio:", datetime.now().strftime("%H:%M:%S"))
+
+    with ProcessPoolExecutor(max_workers=6) as executor:
         futuros = [executor.submit(ejecutar_simulacion, i, franja)
                    for i in range(len(config.CANTIDAD_CONVENCIONALES))]
         for futuro in as_completed(futuros):
             i, sim = futuro.result()
             guardar_resultado(i, franja, sim)  # aquí se escribe el archivo
-            print(f"{franja}_{i+1} Terminado")    
+            print(f"{franja}_{i+1} Terminado")  
+
+    print("Fin:", datetime.now().strftime("%H:%M:%S"))  
 
 if __name__ == "__main__":
     probar_simulacion_paralelo()

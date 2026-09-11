@@ -10,6 +10,7 @@ from flota import Flota
 from capacidad import Capacidad
 import config
 
+
 class Simulacion:
     """
     Parámetros
@@ -38,7 +39,7 @@ class Simulacion:
         self.flota = Flota(cantidad_convencionales, cantidad_electricos, cantidad_autonomos)
         self.calificaciones = SistemaCalificaciones(self.rng)
         self.capacidad = Capacidad(cantidad_convencionales, cantidad_electricos, cantidad_autonomos)
-        
+
         # --- Variables de tiempo de la simulación ---
         self.T = 0.0
         self.TPLL = 0.0
@@ -108,8 +109,17 @@ class Simulacion:
             self.flota.tiempo_comprometido[tipo][indice_taxi] += tiempo_reabastecimiento
             self._costos_variables += costo_reabastecimiento
         self._cantidad_viajes_completados += 1
+
         pago = self.tarifa_base + 2.75 * dis
+
+        porcentaje_retencion=0.35
+        # Los taxis con chofer (convencional, eléctrico) solo retienen el
+        # 35% del pago; el resto es para el taxista. Los autónomos no
+        # tienen chofer, así que retienen el 100%.
+        if tipo in ("convencional", "electrico"):
+            pago = pago * porcentaje_retencion
         self._ingresos += pago
+
         self.calificaciones.registrar_viaje(tipo, tiempo_espera)
 
     # ------------------------------------------------------------------

@@ -137,9 +137,9 @@ class Simulacion:
         if self._cantidad_solicitudes:
             self.PARR = 100 * self._cantidad_arrepentidos / self._cantidad_solicitudes
 
-        porcentaje_sueldo_taxista_por_viaje=0.65
 
-        self.BN = (1-porcentaje_sueldo_taxista_por_viaje) *self._ingresos - self._costos_fijos - self._costos_variables
+
+        self.BN =self._ingresos - self._costos_fijos - self._costos_variables
 
     def __repr__(self):
         return (
